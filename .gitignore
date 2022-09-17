@@ -1,0 +1,48 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/server/node_modules
+/client/node_modules
+/client/.pnp
+.pnp.js
+
+# testing
+/client/coverage
+
+# production
+/client/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# API keys and secrets
+/server/.env
+
+# Dependency directory
+node_modules
+bower_components
+
+# Editors
+.idea
+*.iml
+/idea
+
+# OS metadata
+/server/.DS_Store
+/server/Thumbs.db
+
+# Ignore built ts files
+/server/dist/**/*
+
+# Logging files
+*.log
+*.pyc
+
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
