@@ -1,16 +1,19 @@
-import {Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import {
+    Column,
+    Entity,
+    JoinTable,
+    OneToMany,
+    PrimaryGeneratedColumn
+} from "typeorm";
 import {IsEmail, Length} from "class-validator";
+import {Role} from "./role";
+import {Server} from "./server";
+import { Message } from './message'
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column({
-        length: 80
-    })
-    @Length(10, 80)
-    name: string;
+    @PrimaryGeneratedColumn("uuid")
+    id: string;
 
     @Column({
         length: 100
@@ -18,14 +21,38 @@ export class User {
     @Length(10, 100)
     @IsEmail()
     email: string;
+
+    @Column({
+        length: 80
+    })
+    @Length(5, 80)
+    userName: string;
+
+    @Column({
+        length: 80
+    })
+    @Length(5, 80)
+    password: string;
+
+    @Column('int')
+    role: Role;
+
+    @OneToMany(() => Server, (server) => server.admin)
+    @JoinTable()
+    servers: Server[]
+
+    @OneToMany(() => Message, (message) => message.author)
+    @JoinTable()
+    messages: Message[]
 }
 
 export const userSchema = {
-    id: {type: "number", required: true, example: 1},
-    name: {type: "string", required: true, example: "Javier"},
+    userName: {type: "string", required: true, example: "username"},
+    password: {type: "string", required: true, example: "password"},
     email: {
         type: "string",
         required: true,
-        example: "avileslopez.javier@gmail.com"
-    }
+        example: "email@gmail.com"
+    },
+    role: {type: "number", required: true, example: 2},
 };
