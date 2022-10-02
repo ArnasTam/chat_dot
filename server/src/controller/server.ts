@@ -5,13 +5,13 @@ import {
   responsesAll,
   summary,
   tagsAll
-} from 'koa-swagger-decorator';
-import { Context } from 'koa';
-import { Equal, getManager, Not, Repository } from 'typeorm';
-import { validate, ValidationError } from 'class-validator';
-import { Server, serverSchema } from '../entity/server';
-import { User } from '../entity/user';
-import ServerMapper from '../mappers/server_mapper';
+} from "koa-swagger-decorator";
+import { Context } from "koa";
+import { Equal, getManager, Not, Repository } from "typeorm";
+import { validate, ValidationError } from "class-validator";
+import { Server, serverSchema } from "../entity/server";
+import { User } from "../entity/user";
+import ServerMapper from "../mappers/server_mapper";
 
 @responsesAll({
   200: { description: 'success' },
@@ -71,10 +71,10 @@ export default class ServerController {
       ctx.body = errors;
     } else if (!admin) {
       ctx.status = 400;
-      ctx.body = 'Admin with the specified id does not exist';
+      ctx.body = "Admin with the specified id does not exist";
     } else if (await serverRepository.findOne({ name: serverToBeSaved.name })) {
       ctx.status = 400;
-      ctx.body = 'Server with the specified name already exists';
+      ctx.body = "Server with the specified name already exists";
     } else {
       const server = await serverRepository.save(serverToBeSaved);
       ctx.status = 201;
@@ -95,7 +95,7 @@ export default class ServerController {
     const admin = await userRepository.findOne({ id: ctx.request.body.adminId });
 
     const serverToBeUpdated: Server = new Server();
-    serverToBeUpdated.id = ctx.params.id
+    serverToBeUpdated.id = ctx.params.id;
     serverToBeUpdated.name = ctx.request.body.name;
     serverToBeUpdated.description = ctx.request.body.description;
     serverToBeUpdated.admin = admin;
@@ -108,7 +108,7 @@ export default class ServerController {
       ctx.body = errors;
     } else if (!admin) {
       ctx.status = 400;
-      ctx.body = 'Admin with the specified id does not exist';
+      ctx.body = "Admin with the specified id does not exist";
     } else if (!(await serverRepository.findOne(serverToBeUpdated.id))) {
       ctx.status = 400;
       ctx.body = "The server you are trying to update doesn't exist in the db";
@@ -119,7 +119,7 @@ export default class ServerController {
       })
     ) {
       ctx.status = 400;
-      ctx.body = 'Server with the specified name already exists';
+      ctx.body = "Server with the specified name already exists";
     } else {
       const server = await serverRepository.save(serverToBeUpdated);
       ctx.status = 201;

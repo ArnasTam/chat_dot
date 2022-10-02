@@ -1,10 +1,10 @@
-import { body, path, request, responsesAll, summary, tagsAll } from 'koa-swagger-decorator';
-import { Context } from 'koa';
-import { Equal, getManager, Not, Repository } from 'typeorm';
-import { validate, ValidationError } from 'class-validator';
-import ChannelMapper from '../mappers/channel_mapper';
-import { Channel, channelSchema } from '../entity/channel';
-import { Server } from '../entity/server';
+import { body, path, request, responsesAll, summary, tagsAll } from "koa-swagger-decorator";
+import { Context } from "koa";
+import { Equal, getManager, Not, Repository } from "typeorm";
+import { validate, ValidationError } from "class-validator";
+import ChannelMapper from "../mappers/channel_mapper";
+import { Channel, channelSchema } from "../entity/channel";
+import { Server } from "../entity/server";
 
 @responsesAll({
   200: { description: 'success' },
@@ -63,10 +63,10 @@ export default class ChannelController {
       ctx.body = errors;
     } else if (!server) {
       ctx.status = 400;
-      ctx.body = 'Server with the specified id does not exist';
+      ctx.body = "Server with the specified id does not exist";
     } else if (await channelRepository.findOne({ name: channelToBeSaved.name })) {
       ctx.status = 400;
-      ctx.body = 'Channel with the specified name already exists';
+      ctx.body = "Channel with the specified name already exists";
     } else {
       const channel = await channelRepository.save(channelToBeSaved);
       ctx.status = 201;
@@ -99,7 +99,7 @@ export default class ChannelController {
       ctx.body = errors;
     } else if (!server) {
       ctx.status = 400;
-      ctx.body = 'Server with the specified id does not exist';
+      ctx.body = "Server with the specified id does not exist";
     } else if (!(await channelRepository.findOne(channelToBeUpdated.id))) {
       ctx.status = 400;
       ctx.body = "The channel you are trying to update doesn't exist in the db";
@@ -110,7 +110,7 @@ export default class ChannelController {
       })
     ) {
       ctx.status = 400;
-      ctx.body = 'Channel with the specified name already exists';
+      ctx.body = "Channel with the specified name already exists";
     } else {
       const channel = await channelRepository.save(channelToBeUpdated);
       ctx.status = 201;

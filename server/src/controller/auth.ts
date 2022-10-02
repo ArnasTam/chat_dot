@@ -1,11 +1,11 @@
-import { Context } from 'koa';
-import jwt from 'jsonwebtoken';
-import { path, request, tagsAll } from 'koa-swagger-decorator';
-import { getManager, Repository } from 'typeorm';
-import { User } from '../entity/user';
-import { config } from '../config';
+import { Context } from "koa";
+import jwt from "jsonwebtoken";
+import { path, request, tagsAll } from "koa-swagger-decorator";
+import { getManager, Repository } from "typeorm";
+import { User } from "../entity/user";
+import { config } from "../config";
 
-const bcrypt = require('bcrypt');
+import bcrypt from "bcryptjs";
 
 @tagsAll(['Auth'])
 export default class AuthController {
@@ -25,7 +25,7 @@ export default class AuthController {
 
     if (!passwordCompare || !user) {
       ctx.status = 401;
-      ctx.body = 'Failed to login';
+      ctx.body = "Failed to login";
     } else {
       ctx.status = 200;
       ctx.body = AuthController.getJwt(user);
@@ -33,8 +33,8 @@ export default class AuthController {
   }
 
   private static getJwt(user: User) {
-    let key = config.jwtSecret;
-    let data = {
+    const key = config.jwtSecret;
+    const data = {
       userId: user.id,
       role: user.role,
       time: Date(),

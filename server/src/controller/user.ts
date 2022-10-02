@@ -1,6 +1,6 @@
-import { Context } from 'koa';
-import { Equal, getManager, Not, Repository } from 'typeorm';
-import { validate, ValidationError } from 'class-validator';
+import { Context } from "koa";
+import { Equal, getManager, Not, Repository } from "typeorm";
+import { validate, ValidationError } from "class-validator";
 import {
   body,
   path,
@@ -8,11 +8,11 @@ import {
   responsesAll,
   summary,
   tagsAll
-} from 'koa-swagger-decorator';
-import { User, userSchema } from '../entity/user';
-import { Role } from '../entity/role';
+} from "koa-swagger-decorator";
+import { User, userSchema } from "../entity/user";
+import { Role } from "../entity/role";
 
-const bcrypt = require('bcrypt');
+import bcrypt from "bcryptjs";
 
 @responsesAll({
   200: { description: 'success' },
@@ -83,11 +83,11 @@ export default class UserController {
     } else if (await userRepository.findOne({ email: userToBeSaved.email })) {
       // return BAD REQUEST status code and email already exists error
       ctx.status = 400;
-      ctx.body = 'The specified e-mail address already exists';
+      ctx.body = "The specified e-mail address already exists";
     } else if (await userRepository.findOne({ userName: userToBeSaved.userName })) {
       // return BAD REQUEST status code and email already exists error
       ctx.status = 400;
-      ctx.body = 'The specified userName address already exists';
+      ctx.body = "The specified userName address already exists";
     } else {
       // save the user contained in the POST body
       const user = await userRepository.save(userToBeSaved);
@@ -134,7 +134,7 @@ export default class UserController {
     ) {
       // return BAD REQUEST status code and email already exists error
       ctx.status = 400;
-      ctx.body = 'The specified e-mail address already exists';
+      ctx.body = "The specified e-mail address already exists";
     } else {
       // save the user contained in the PUT body
       const user = await userRepository.save(userToBeUpdated);
@@ -163,7 +163,7 @@ export default class UserController {
       // check user's token id and user id are the same
       // if not, return a FORBIDDEN status code and error message
       ctx.status = 403;
-      ctx.body = 'A user can only be deleted by himself';
+      ctx.body = "A user can only be deleted by himself";
     } else {
       // the user is there so can be removed
       await userRepository.remove(userToRemove);

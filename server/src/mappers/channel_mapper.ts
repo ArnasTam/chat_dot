@@ -1,4 +1,4 @@
-import { Channel } from '../entity/channel';
+import { Channel } from "../entity/channel";
 
 export default class ChannelMapper {
   public static mapToChannelResponseDTO = function(channel: Channel) {

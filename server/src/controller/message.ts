@@ -5,14 +5,14 @@ import {
   responsesAll,
   summary,
   tagsAll
-} from 'koa-swagger-decorator';
-import { Context } from 'koa';
-import { getManager, Repository } from 'typeorm';
-import { validate, ValidationError } from 'class-validator';
-import { Message, messageSchema } from '../entity/message';
-import { User } from '../entity/user';
-import MessageMapper from '../mappers/message_mapper';
-import { Channel } from '../entity/channel';
+} from "koa-swagger-decorator";
+import { Context } from "koa";
+import { getManager, Repository } from "typeorm";
+import { validate, ValidationError } from "class-validator";
+import { Message, messageSchema } from "../entity/message";
+import { User } from "../entity/user";
+import MessageMapper from "../mappers/message_mapper";
+import { Channel } from "../entity/channel";
 
 @responsesAll({
   200: { description: 'success' },
@@ -75,10 +75,10 @@ export default class MessageController {
       ctx.body = errors;
     } else if (!author) {
       ctx.status = 400;
-      ctx.body = 'Author with the specified id does not exist';
+      ctx.body = "Author with the specified id does not exist";
     } else if (!channel) {
       ctx.status = 400;
-      ctx.body = 'Channel with the specified id does not exist';
+      ctx.body = "Channel with the specified id does not exist";
     } else {
       const message = await messageRepository.save(messageToBeSaved);
       ctx.status = 201;
@@ -101,7 +101,7 @@ export default class MessageController {
     const channel = await channelRepository.findOne({ id: ctx.request.body.channelId });
 
     const messageToBeUpdated: Message = new Message();
-    messageToBeUpdated.id = ctx.params.id
+    messageToBeUpdated.id = ctx.params.id;
     messageToBeUpdated.content = ctx.request.body.content;
     messageToBeUpdated.dateCreated = new Date();
     messageToBeUpdated.author = author;
@@ -115,10 +115,10 @@ export default class MessageController {
       ctx.body = errors;
     } else if (!author) {
       ctx.status = 400;
-      ctx.body = 'Author with the specified id does not exist';
+      ctx.body = "Author with the specified id does not exist";
     } else if (!channel) {
       ctx.status = 400;
-      ctx.body = 'Channel with the specified id does not exist';
+      ctx.body = "Channel with the specified id does not exist";
     } else if (!(await messageRepository.findOne(messageToBeUpdated.id))) {
       ctx.status = 400;
       ctx.body = "The message you are trying to update doesn't exist in the db";

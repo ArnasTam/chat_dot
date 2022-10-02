@@ -8,7 +8,7 @@ import {
 import {IsEmail, Length} from "class-validator";
 import {Role} from "./role";
 import {Server} from "./server";
-import { Message } from './message'
+import { Message } from "./message";
 
 @Entity()
 export class User {

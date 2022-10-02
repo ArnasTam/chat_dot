@@ -1,7 +1,7 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Length } from 'class-validator';
-import { Channel } from './channel';
-import { User } from './user';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Length } from "class-validator";
+import { Channel } from "./channel";
+import { User } from "./user";
 
 @Entity()
 export class Message {
@@ -25,7 +25,7 @@ export class Message {
 }
 
 export const messageSchema = {
-    content: { type: 'string', required: true, example: 'content' },
-    channelId: { type: 'uuid', required: true },
-    authorId: { type: 'uuid', required: true },
+    content: { type: "string", required: true, example: "content" },
+    channelId: { type: "uuid", required: true },
+    authorId: { type: "uuid", required: true },
 };
