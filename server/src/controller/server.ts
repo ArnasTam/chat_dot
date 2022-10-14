@@ -5,13 +5,15 @@ import {
   responsesAll,
   summary,
   tagsAll
-} from "koa-swagger-decorator";
-import { Context } from "koa";
-import { Equal, getManager, Not, Repository } from "typeorm";
-import { validate, ValidationError } from "class-validator";
-import { Server, serverSchema } from "../entity/server";
-import { User } from "../entity/user";
-import ServerMapper from "../mappers/server_mapper";
+} from 'koa-swagger-decorator';
+import { Context } from 'koa';
+import { Equal, getManager, Not, Repository } from 'typeorm';
+import { validate, ValidationError } from 'class-validator';
+import { Server, serverSchema } from '../entity/server';
+import { User } from '../entity/user';
+import ServerMapper from '../mappers/server_mapper';
+import { Channel } from '../entity/channel';
+import ChannelMapper from '../mappers/channel_mapper';
 
 @responsesAll({
   200: { description: 'success' },
@@ -45,8 +47,35 @@ export default class ServerController {
       ctx.status = 200;
       ctx.body = ServerMapper.mapToServerResponseDTO(server);
     } else {
-      ctx.status = 400;
+      ctx.status = 404;
       ctx.body = "The server you are trying to retrieve doesn't exist in the db";
+    }
+  }
+
+  @request('get', '/servers/{serverId}/channels')
+  @summary('Get all channels by server name')
+  @path({
+    serverId: { type: 'uuid', required: true },
+  })
+  public static async getChannelsByServerName(ctx: Context): Promise<void> {
+    const serverRepository: Repository<Server> = getManager().getRepository(Server);
+    const channelRepository: Repository<Channel> = getManager().getRepository(Channel);
+
+    const server: Server | undefined = await serverRepository.findOne({ id: ctx.params.serverId });
+    const channels = await channelRepository.find({ server: server })
+
+    if (!server) {
+      ctx.status = 404;
+      ctx.body = "The server you specified doesn't exist in the db";
+      return
+    }
+
+    if (channels) {
+      ctx.status = 200;
+      ctx.body = channels.map((channel) => ChannelMapper.mapToChannelResponseDTO(channel));
+    } else {
+      ctx.status = 404;
+      ctx.body = "The server you specified doesn't exist in the db";
     }
   }
 
@@ -110,7 +139,7 @@ export default class ServerController {
       ctx.status = 400;
       ctx.body = "Admin with the specified id does not exist";
     } else if (!(await serverRepository.findOne(serverToBeUpdated.id))) {
-      ctx.status = 400;
+      ctx.status = 404;
       ctx.body = "The server you are trying to update doesn't exist in the db";
     } else if (
       await serverRepository.findOne({
@@ -139,7 +168,7 @@ export default class ServerController {
 
     // TODO: check if server is deleted by owner
     if (!serverToRemove) {
-      ctx.status = 400;
+      ctx.status = 404;
       ctx.body = "The server you are trying to delete doesn't exist in the db";
     } else {
       await serverRepository.remove(serverToRemove);

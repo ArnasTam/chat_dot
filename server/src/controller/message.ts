@@ -46,7 +46,7 @@ export default class MessageController {
       ctx.status = 200;
       ctx.body = MessageMapper.mapToMessageResponseDTO(message);
     } else {
-      ctx.status = 400;
+      ctx.status = 404;
       ctx.body = "The message you are trying to retrieve doesn't exist in the db";
     }
   }
@@ -120,7 +120,7 @@ export default class MessageController {
       ctx.status = 400;
       ctx.body = "Channel with the specified id does not exist";
     } else if (!(await messageRepository.findOne(messageToBeUpdated.id))) {
-      ctx.status = 400;
+      ctx.status = 404;
       ctx.body = "The message you are trying to update doesn't exist in the db";
     } else {
       const message = await messageRepository.save(messageToBeUpdated);
@@ -141,8 +141,9 @@ export default class MessageController {
 
     // TODO: check if message is deleted by owner
     if (!messageToRemove) {
-      ctx.status = 400;
-      ctx.body = "The message you are trying to delete doesn't exist in the db";
+      ctx.status = 404;
+      throw Error("The message you are trying to delete doesn't exist in the db")
+
     } else {
       await messageRepository.remove(messageToRemove);
       ctx.status = 204;

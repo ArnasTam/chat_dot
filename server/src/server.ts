@@ -13,6 +13,8 @@ import { unprotectedRouter } from './unprotectedRoutes';
 import { protectedRouter } from './protectedRoutes';
 import { cron } from './cron';
 
+const error = require('koa-json-error')
+
 const connectionOptions: ConnectionOptions = {
   type: 'postgres',
   host: process.env.DB_HOST,
@@ -35,6 +37,29 @@ createConnection(connectionOptions)
   .then(async () => {
     const app = new Koa();
 
+    app.use(error())
+
+    app.use(async function(ctx, next) {
+      await next();
+
+      if(ctx.status >= 400) {
+        ctx.status = ctx.status || 500;
+        ctx.type = 'json';
+        ctx.body = {error: ctx.body};
+      }
+    });
+
+    // app.use(async (ctx, next) => {
+    //   await next();
+    //   if(parseInt(String(ctx.status)) >= 400){
+    //     ctx.status = ctx.response.status
+    //     ctx.body = {error: ctx.message};
+    //   }
+    // })
+
+    // Enable bodyParser with default options
+    app.use(bodyParser());
+
     // Provides important security headers to make your app more secure
     app.use(
       helmet.contentSecurityPolicy({
@@ -53,9 +78,6 @@ createConnection(connectionOptions)
 
     // Logger middleware -> use winston as logger (logging.ts with config)
     app.use(logger(winston));
-
-    // Enable bodyParser with default options
-    app.use(bodyParser());
 
     // these routes are NOT protected by the JWT middleware, also include middleware to respond with "Method Not Allowed - 405".
     app.use(unprotectedRouter.routes()).use(unprotectedRouter.allowedMethods());

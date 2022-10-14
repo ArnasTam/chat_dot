@@ -1,10 +1,19 @@
-import { body, path, request, responsesAll, summary, tagsAll } from "koa-swagger-decorator";
-import { Context } from "koa";
-import { Equal, getManager, Not, Repository } from "typeorm";
-import { validate, ValidationError } from "class-validator";
-import ChannelMapper from "../mappers/channel_mapper";
-import { Channel, channelSchema } from "../entity/channel";
-import { Server } from "../entity/server";
+import {
+  body,
+  path,
+  request,
+  responsesAll,
+  summary,
+  tagsAll
+} from 'koa-swagger-decorator';
+import { Context } from 'koa';
+import { Equal, getManager, Not, Repository } from 'typeorm';
+import { validate, ValidationError } from 'class-validator';
+import ChannelMapper from '../mappers/channel_mapper';
+import { Channel, channelSchema } from '../entity/channel';
+import { Server } from '../entity/server';
+import { Message } from '../entity/message';
+import MessageMapper from '../mappers/message_mapper';
 
 @responsesAll({
   200: { description: 'success' },
@@ -38,14 +47,36 @@ export default class ChannelController {
       ctx.status = 200;
       ctx.body = ChannelMapper.mapToChannelResponseDTO(channel);
     } else {
-      ctx.status = 400;
-      ctx.body = "The channel you are trying to retrieve doesn't exist in the db";
+      ctx.status = 404;
+      ctx.body = { error: "The channel you are trying to retrieve doesn't exist in the db"};
+    }
+  }
+
+  @request('get', '/servers/{serverId}/channels/{channelId}/messages')
+  @summary('Get all messages by channel name')
+  @path({
+    channelId: { type: 'uuid', required: true },
+  })
+  public static async getMesssageByChannelId(ctx: Context): Promise<void> {
+    const messageReposityor: Repository<Message> = getManager().getRepository(Message);
+    const channelRepository: Repository<Channel> = getManager().getRepository(Channel);
+    const serverRepo: Repository<Server> = getManager().getRepository(Server);
+
+    const server: Server | undefined = await serverRepo.findOne({id: ctx.params.serverId})
+    const channel: Channel | undefined = await channelRepository.findOne({ id: ctx.params.channelId, server: server });
+    const messages = await messageReposityor.find({ channel: channel })
+
+    if (channel) {
+      ctx.status = 200;
+      ctx.body = messages.map((message) => MessageMapper.mapToMessageResponseDTO(message));
+    } else {
+      ctx.status = 404;
+      ctx.body = { error: "The channel you are trying to retrieve doesn't exist in the db"};
     }
   }
 
   @request('post', '/channels')
   @summary('Create a channel')
-  @body(channelSchema)
   public static async createChannel(ctx: Context): Promise<void> {
     const channelRepository: Repository<Channel> = getManager().getRepository(Channel);
     const serverRepository: Repository<Server> = getManager().getRepository(Server);
@@ -64,7 +95,7 @@ export default class ChannelController {
     } else if (!server) {
       ctx.status = 400;
       ctx.body = "Server with the specified id does not exist";
-    } else if (await channelRepository.findOne({ name: channelToBeSaved.name })) {
+    } else if (await channelRepository.findOne({ name: channelToBeSaved.name, server:server})) {
       ctx.status = 400;
       ctx.body = "Channel with the specified name already exists";
     } else {
@@ -101,7 +132,7 @@ export default class ChannelController {
       ctx.status = 400;
       ctx.body = "Server with the specified id does not exist";
     } else if (!(await channelRepository.findOne(channelToBeUpdated.id))) {
-      ctx.status = 400;
+      ctx.status = 404;
       ctx.body = "The channel you are trying to update doesn't exist in the db";
     } else if (
       await channelRepository.findOne({
@@ -130,7 +161,7 @@ export default class ChannelController {
 
     // TODO: check if channel is deleted by owner
     if (!channelToRemove) {
-      ctx.status = 400;
+      ctx.status = 404;
       ctx.body = "The channel you are trying to delete doesn't exist in the db";
     } else {
       await channelRepository.remove(channelToRemove);
