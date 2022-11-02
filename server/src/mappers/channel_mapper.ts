@@ -5,6 +5,7 @@ export default class ChannelMapper {
     return {
       id: channel.id,
       name: channel.name,
+      createdById: channel.creator?.id,
       serverId: channel.server.id,
     };
   };

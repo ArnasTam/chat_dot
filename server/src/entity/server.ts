@@ -6,10 +6,10 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-} from "typeorm";
-import { Length } from "class-validator";
-import { User } from "./user";
-import { Channel } from "./channel";
+} from 'typeorm';
+import { Length } from 'class-validator';
+import { User } from './user';
+import { Channel } from './channel';
 
 @Entity()
 export class Server {
@@ -41,7 +41,6 @@ export class Server {
 }
 
 export const serverSchema = {
-  name: { type: "string", required: true, example: "name" },
-  description: { type: "string", required: true, example: "description" },
-  adminId: { type: "uuid", required: true },
+  name: { type: 'string', required: true, example: 'name' },
+  description: { type: 'string', required: true, example: 'description' },
 };

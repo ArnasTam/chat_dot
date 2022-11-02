@@ -67,7 +67,7 @@ export default class UserController {
     const userToBeSaved: User = new User();
     userToBeSaved.userName = ctx.request.body.userName;
     userToBeSaved.email = ctx.request.body.email;
-    userToBeSaved.role = Role.BasicUser;
+    userToBeSaved.role =  ctx.request.body.role;
 
     // Encryption
     const salt = bcrypt.genSaltSync();

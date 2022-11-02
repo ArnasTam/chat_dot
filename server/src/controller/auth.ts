@@ -1,11 +1,12 @@
-import { Context } from "koa";
-import jwt from "jsonwebtoken";
-import { path, request, tagsAll } from "koa-swagger-decorator";
-import { getManager, Repository } from "typeorm";
-import { User } from "../entity/user";
-import { config } from "../config";
+import { Context } from 'koa';
+import jwt from 'jsonwebtoken';
+import { path, request, tagsAll } from 'koa-swagger-decorator';
+import { getManager, Repository } from 'typeorm';
+import { User } from '../entity/user';
+import { config } from '../config';
 
-import bcrypt from "bcryptjs";
+import bcrypt from 'bcryptjs';
+import { Role } from '../entity/role';
 
 @tagsAll(['Auth'])
 export default class AuthController {
@@ -25,7 +26,7 @@ export default class AuthController {
 
     if (!passwordCompare || !user) {
       ctx.status = 401;
-      ctx.body = "Failed to login";
+      ctx.body = 'Failed to login';
     } else {
       ctx.status = 200;
       ctx.body = AuthController.getJwt(user);
@@ -37,10 +38,21 @@ export default class AuthController {
     const data = {
       userId: user.id,
       role: user.role,
-      time: Date(),
+      time: Date().toLocaleLowerCase(),
     };
 
     return jwt.sign(data, key);
   }
+
+  // TODO: Move to separare util
+  public static getToken(ctx: Context): Token {
+    return jwt.decode(ctx.headers.authorization.split(' ')[1]) as Token;
+  }
 }
 
+
+export class Token {
+  userId: string;
+  role: Role;
+  time: string;
+}

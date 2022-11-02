@@ -12,8 +12,8 @@ import { validate, ValidationError } from 'class-validator';
 import { Server, serverSchema } from '../entity/server';
 import { User } from '../entity/user';
 import ServerMapper from '../mappers/server_mapper';
-import { Channel } from '../entity/channel';
-import ChannelMapper from '../mappers/channel_mapper';
+import AuthController, { Token } from './auth';
+import { Role } from '../entity/role';
 
 @responsesAll({
   200: { description: 'success' },
@@ -52,41 +52,21 @@ export default class ServerController {
     }
   }
 
-  @request('get', '/servers/{serverId}/channels')
-  @summary('Get all channels by server name')
-  @path({
-    serverId: { type: 'uuid', required: true },
-  })
-  public static async getChannelsByServerName(ctx: Context): Promise<void> {
-    const serverRepository: Repository<Server> = getManager().getRepository(Server);
-    const channelRepository: Repository<Channel> = getManager().getRepository(Channel);
-
-    const server: Server | undefined = await serverRepository.findOne({ id: ctx.params.serverId });
-    const channels = await channelRepository.find({ server: server })
-
-    if (!server) {
-      ctx.status = 404;
-      ctx.body = "The server you specified doesn't exist in the db";
-      return
-    }
-
-    if (channels) {
-      ctx.status = 200;
-      ctx.body = channels.map((channel) => ChannelMapper.mapToChannelResponseDTO(channel));
-    } else {
-      ctx.status = 404;
-      ctx.body = "The server you specified doesn't exist in the db";
-    }
-  }
-
   @request('post', '/servers')
   @summary('Create a server')
   @body(serverSchema)
   public static async createServer(ctx: Context): Promise<void> {
     const serverRepository: Repository<Server> = getManager().getRepository(Server);
     const userRepository: Repository<User> = getManager().getRepository(User);
+    const token = AuthController.getToken(ctx);
 
-    const admin = await userRepository.findOne({ id: ctx.request.body.adminId });
+    const admin = await userRepository.findOne({ id: token.userId });
+
+    if (token.role != Role.SuperAdmin && token.role != Role.ServerAdmin) {
+      ctx.status = 401;
+      ctx.body = 'No permission to perform this action';
+      return;
+    }
 
     const serverToBeSaved: Server = new Server();
     serverToBeSaved.name = ctx.request.body.name;
@@ -100,10 +80,10 @@ export default class ServerController {
       ctx.body = errors;
     } else if (!admin) {
       ctx.status = 400;
-      ctx.body = "Admin with the specified id does not exist";
+      ctx.body = 'Token contains invalid user id';
     } else if (await serverRepository.findOne({ name: serverToBeSaved.name })) {
       ctx.status = 400;
-      ctx.body = "Server with the specified name already exists";
+      ctx.body = 'Server with the specified name already exists';
     } else {
       const server = await serverRepository.save(serverToBeSaved);
       ctx.status = 201;
@@ -120,27 +100,38 @@ export default class ServerController {
   public static async updateServer(ctx: Context): Promise<void> {
     const serverRepository: Repository<Server> = getManager().getRepository(Server);
     const userRepository: Repository<User> = getManager().getRepository(User);
+    const token = AuthController.getToken(ctx);
 
-    const admin = await userRepository.findOne({ id: ctx.request.body.adminId });
+    const admin = await userRepository.findOne({ id: token.userId });
+    const oldServer = await serverRepository.findOne(ctx.params.id);
+
+    if (!oldServer) {
+      ctx.status = 404;
+      ctx.body = "The server you are trying to update doesn't exist in the db";
+      return
+    }
+
+    if (!ServerController.hasServerPermission(token, oldServer)) {
+      ctx.status = 401;
+      ctx.body = 'No permission to perform this action';
+      return;
+    }
+
 
     const serverToBeUpdated: Server = new Server();
     serverToBeUpdated.id = ctx.params.id;
     serverToBeUpdated.name = ctx.request.body.name;
     serverToBeUpdated.description = ctx.request.body.description;
-    serverToBeUpdated.admin = admin;
+    serverToBeUpdated.admin = oldServer.admin;
 
     const errors: ValidationError[] = await validate(serverToBeUpdated);
 
-    // TODO: check if user has permissions
     if (errors.length > 0) {
       ctx.status = 400;
       ctx.body = errors;
     } else if (!admin) {
       ctx.status = 400;
-      ctx.body = "Admin with the specified id does not exist";
-    } else if (!(await serverRepository.findOne(serverToBeUpdated.id))) {
-      ctx.status = 404;
-      ctx.body = "The server you are trying to update doesn't exist in the db";
+      ctx.body = 'Admin with the specified id does not exist';
     } else if (
       await serverRepository.findOne({
         id: Not(Equal(serverToBeUpdated.id)),
@@ -148,7 +139,7 @@ export default class ServerController {
       })
     ) {
       ctx.status = 400;
-      ctx.body = "Server with the specified name already exists";
+      ctx.body = 'Server with the specified name already exists';
     } else {
       const server = await serverRepository.save(serverToBeUpdated);
       ctx.status = 201;
@@ -163,10 +154,16 @@ export default class ServerController {
   })
   public static async deleteServer(ctx: Context): Promise<void> {
     const serverRepository = getManager().getRepository(Server);
+    const token = AuthController.getToken(ctx);
 
     const serverToRemove: Server | undefined = await serverRepository.findOne(ctx.params.id);
 
-    // TODO: check if server is deleted by owner
+    if (serverToRemove && !ServerController.hasServerPermission(token, serverToRemove)) {
+      ctx.status = 401;
+      ctx.body = 'No permission to perform this action';
+      return;
+    }
+
     if (!serverToRemove) {
       ctx.status = 404;
       ctx.body = "The server you are trying to delete doesn't exist in the db";
@@ -174,5 +171,14 @@ export default class ServerController {
       await serverRepository.remove(serverToRemove);
       ctx.status = 204;
     }
+  }
+
+  public static hasServerPermission(token: Token, server: Server): boolean {
+    if (token.role == Role.SuperAdmin) return true;
+    if (token.role == Role.ServerAdmin) {
+      if (server.admin.id == token.userId) return true;
+    }
+
+    return false;
   }
 }

@@ -9,6 +9,8 @@ import {IsEmail, Length} from "class-validator";
 import {Role} from "./role";
 import {Server} from "./server";
 import { Message } from "./message";
+import { Channel } from './channel'
+import { channel } from '../controller'
 
 @Entity()
 export class User {
@@ -40,6 +42,10 @@ export class User {
     @OneToMany(() => Server, (server) => server.admin)
     @JoinTable()
     servers: Server[]
+
+    @OneToMany(() => Channel, (channel) => channel.creator)
+    @JoinTable()
+    channels: Channel[]
 
     @OneToMany(() => Message, (message) => message.author)
     @JoinTable()

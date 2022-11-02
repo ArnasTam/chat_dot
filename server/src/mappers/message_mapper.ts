@@ -6,6 +6,7 @@ export default class MessageMapper {
       id: message.id,
       content: message.content,
       dateCreated: message.dateCreated,
+      dateUpdated: message.dateUpdated,
       channelId: message.channel.id,
       authorId: message.author.id,
     };
