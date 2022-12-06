@@ -1,4 +1,4 @@
-import { Message } from "../entity/message";
+import { Message } from '../entity/message';
 
 export default class MessageMapper {
   public static mapToMessageResponseDTO = function (message: Message) {

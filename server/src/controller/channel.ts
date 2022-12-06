@@ -160,7 +160,7 @@ export default class ChannelController {
     const creator = await userRepository.findOne({ id: token.userId });
 
     if (server && !ChannelController.hasServerPermission(token, server)) {
-      ctx.status = 401;
+      ctx.status = 403;
       ctx.body = 'No permission to perform this action';
       return;
     }
@@ -251,7 +251,7 @@ export default class ChannelController {
     const server = await serverRepository.findOne({ id: ctx.params.serverId });
 
     if (server && !ChannelController.hasServerPermission(token, server)) {
-      ctx.status = 401;
+      ctx.status = 403;
       ctx.body = 'No permission to perform this action';
       return;
     }
@@ -330,7 +330,7 @@ export default class ChannelController {
     });
 
     if (server && !ChannelController.hasServerPermission(token, server)) {
-      ctx.status = 401;
+      ctx.status = 403;
       ctx.body = 'No permission to perform this action';
       return;
     }

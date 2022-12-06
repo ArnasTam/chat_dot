@@ -1,29 +1,34 @@
 import React from "react";
-import { Box } from "../../components/misc/box/box";
-import NavBar from "../../components/misc/navbar/navbar";
-import { GrKeyboard } from "react-icons/gr";
-import { Grid, Text } from "@nextui-org/react";
+import { Grid, Image } from "@nextui-org/react";
+import Layout from "../../components/misc/layout";
 
 export default function HomePage() {
   return (
-    <Box>
-      <NavBar />
+    <Layout>
       <Grid.Container
         css={{
           p: "30px",
           w: "100%",
-          h: "80vh",
           display: "flex",
           alignItems: "center",
         }}
         direction="column"
         justify="center"
       >
-        <GrKeyboard size="70px" />
-        <Text size="20px" color="inherit" css={{ textAlign: "center" }}>
-          Go to servers page to start chatting
-        </Text>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+          aliquip ex ea commodo consequat. Duis aute irure dolor in
+          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+          culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+        <Image
+          css={{ maxW: "600px" }}
+          src="https://previews.123rf.com/images/stockgiu/stockgiu1905/stockgiu190510814/122065842-millennial-smartphone-chat-conversation-young-people-talking-app-text-bubbles-black-and-white-vector.jpg"
+        />
       </Grid.Container>
-    </Box>
+    </Layout>
   );
 }

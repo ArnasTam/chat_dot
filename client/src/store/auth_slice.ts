@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { postLogin } from "../services/auth/auth_service";
 import axios from "axios";
+import jwt_decode from "jwt-decode";
 
 export const login = createAsyncThunk(
   "auth/login",
@@ -64,10 +65,43 @@ export const isAuthenticated = () => {
 };
 
 export const getJWT = () => {
-  console.log(localStorage.getItem("token"));
   return localStorage.getItem("token");
+};
+
+export const getUserId = () => {
+  const token = getJWT();
+  if (token == null) return;
+
+  const decoded = jwt_decode(token) as any;
+
+  return decoded.userId;
+};
+
+export const getUsername = () => {
+  const token = getJWT();
+  if (token == null) return;
+
+  const decoded = jwt_decode(token) as any;
+
+  return decoded.userName;
+};
+
+export const getRole = () => {
+  const token = getJWT();
+  if (token == null) return;
+
+  const decoded = jwt_decode(token) as any;
+
+  return decoded.role as Role;
 };
 
 export const { logOut } = authSlice.actions;
 
 export default authSlice.reducer;
+
+
+export enum Role {
+  SuperAdmin,
+  ServerAdmin,
+  BasicUser,
+}

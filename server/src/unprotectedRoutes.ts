@@ -4,7 +4,6 @@ import AuthController from "./controller/auth";
 
 const unprotectedRouter = new Router();
 
-// Hello World route
 unprotectedRouter.get("/", general.helloWorld);
 unprotectedRouter.post("/auth/login", AuthController.login);
 

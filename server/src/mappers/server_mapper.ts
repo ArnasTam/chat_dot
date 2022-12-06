@@ -1,4 +1,4 @@
-import { Server } from "../entity/server";
+import { Server } from '../entity/server';
 
 export default class ServerMapper {
   public static mapToServerResponseDTO = function (server: Server) {
@@ -8,5 +8,5 @@ export default class ServerMapper {
       name: server.name,
       description: server.description,
     };
-  }
+  };
 }

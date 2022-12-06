@@ -38,6 +38,7 @@ export default class AuthController {
     const data = {
       userId: user.id,
       role: user.role,
+      userName: user.userName,
       time: Date().toLocaleLowerCase(),
     };
 
@@ -53,6 +54,7 @@ export default class AuthController {
 
 export class Token {
   userId: string;
+  userName: string;
   role: Role;
   time: string;
 }

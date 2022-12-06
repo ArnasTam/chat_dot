@@ -2,12 +2,16 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./auth_slice";
 import serversReducer from "./server_slice";
 import singleServerReducer from "./single_server_slice";
+import singleChannelReducer from "./single_channel_slice";
+import singleMessageReducer from "./single_message_slice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     servers: serversReducer,
     singleServer: singleServerReducer,
+    singleChannel: singleChannelReducer,
+    singleMessage: singleMessageReducer,
   },
 });
 

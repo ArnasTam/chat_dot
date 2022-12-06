@@ -1,8 +1,15 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getServerById } from "../services/server_service";
 import { Server } from "../types/server";
-import { getServerChannels } from "../services/channel_service";
+import {
+  addChannel,
+  deleteChannel,
+  getServerChannels,
+  updateChannel,
+} from "../services/channel_service";
 import { Channel } from "../types/channel";
+import { FetchingStatus } from "../types/fetching_status";
+import { singleChannelSlice } from './single_channel_slice'
 
 export const getServerByIdAction = createAsyncThunk(
   "singleServer/getById",
@@ -30,9 +37,54 @@ export const getAllServerChannelsAction = createAsyncThunk(
   }
 );
 
+export const addChannelAction = createAsyncThunk(
+  "channels/add",
+  async (props: { name: string; serverId: string }, { rejectWithValue }) => {
+    try {
+      return await addChannel(props);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+);
+
+export const updateChannelAction = createAsyncThunk(
+  "channels/update",
+  async (
+    props: { id: string; name: string; serverId: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      return await updateChannel(props);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+);
+
+export const deleteChannelAction = createAsyncThunk(
+  "channels/delete",
+  async (props: { id: string; serverId: string }, { rejectWithValue }) => {
+    try {
+      return await deleteChannel(props);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+);
+
 interface ServerState {
-  getServerStatus: "idle" | "pending" | "succeeded" | "failed";
-  getChannelsState: "idle" | "pending" | "succeeded" | "failed";
+  getServerStatus: FetchingStatus;
+  getChannelsState: FetchingStatus;
+  addChannelState: FetchingStatus;
+  editChannelState: FetchingStatus;
+  deleteChannelState: FetchingStatus;
   server: Server | null;
   channels: Channel[];
 }
@@ -40,6 +92,9 @@ interface ServerState {
 const initialState: ServerState = {
   getServerStatus: "idle",
   getChannelsState: "idle",
+  addChannelState: "idle",
+  editChannelState: "idle",
+  deleteChannelState: "idle",
   server: null,
   channels: [],
 };
@@ -47,7 +102,20 @@ const initialState: ServerState = {
 export const singleServerSlice = createSlice({
   name: "singleServer",
   initialState,
-  reducers: {},
+  reducers: {
+    clear: (state) => {
+      state.getServerStatus= "idle";
+      state.getChannelsState= "idle";
+      state.addChannelState= "idle";
+      state.editChannelState= "idle";
+      state.deleteChannelState= "idle";
+      state.server= null;
+      state.channels= [];
+    },
+    clearDelete: (state) => {
+      state.deleteChannelState = "idle";
+    },
+  },
   extraReducers: (builder) => {
     // Add reducers for additional action types here, and handle loading state as needed
     builder.addCase(getServerByIdAction.fulfilled, (state, action) => {
@@ -75,7 +143,45 @@ export const singleServerSlice = createSlice({
     builder.addCase(getAllServerChannelsAction.rejected, (state, action) => {
       state.getChannelsState = "failed";
     });
+
+    builder.addCase(addChannelAction.fulfilled, (state, action) => {
+      state.addChannelState = "succeeded";
+    });
+
+    builder.addCase(addChannelAction.pending, (state, action) => {
+      state.addChannelState = "pending";
+    });
+
+    builder.addCase(addChannelAction.rejected, (state, action) => {
+      state.addChannelState = "failed";
+    });
+
+    builder.addCase(updateChannelAction.fulfilled, (state, action) => {
+      state.editChannelState = "succeeded";
+    });
+
+    builder.addCase(updateChannelAction.pending, (state, action) => {
+      state.editChannelState = "pending";
+    });
+
+    builder.addCase(updateChannelAction.rejected, (state, action) => {
+      state.editChannelState = "failed";
+    });
+
+    builder.addCase(deleteChannelAction.fulfilled, (state, action) => {
+      state.deleteChannelState = "succeeded";
+    });
+
+    builder.addCase(deleteChannelAction.pending, (state, action) => {
+      state.deleteChannelState = "pending";
+    });
+
+    builder.addCase(deleteChannelAction.rejected, (state, action) => {
+      state.deleteChannelState = "failed";
+    });
   },
 });
+
+export const { clear, clearDelete } = singleServerSlice.actions;
 
 export default singleServerSlice.reducer;

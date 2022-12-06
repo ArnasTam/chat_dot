@@ -6,6 +6,7 @@ import {
   updateServer,
 } from "../services/server_service";
 import { Server } from "../types/server";
+import { singleServerSlice } from './single_server_slice'
 
 export const getServers = createAsyncThunk(
   "server/getAll",
@@ -83,7 +84,11 @@ const initialState: ServerState = {
 export const serverSlice = createSlice({
   name: "server",
   initialState,
-  reducers: {},
+  reducers: {
+    clearDelete: (state) => {
+      state.deleteServerStatus = "idle";
+    },
+  },
   extraReducers: (builder) => {
     // Add reducers for additional action types here, and handle loading state as needed
     builder.addCase(getServers.fulfilled, (state, action) => {
@@ -136,5 +141,7 @@ export const serverSlice = createSlice({
     });
   },
 });
+
+export const { clearDelete } = serverSlice.actions;
 
 export default serverSlice.reducer;

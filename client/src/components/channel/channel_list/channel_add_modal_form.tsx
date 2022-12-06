@@ -6,22 +6,21 @@ import {
   Modal,
   Progress,
   Text,
-  Textarea,
 } from "@nextui-org/react";
 import { useAppDispatch, useAppSelector } from "../../../hooks/hooks";
-import { addServerAction } from "../../../store/server_slice";
+import { addChannelAction } from "../../../store/single_server_slice";
+import { useParams } from "react-router-dom";
 import { RootState } from "../../../store/store";
 import { Alert, AlertDescription, AlertIcon } from "@chakra-ui/react";
 
-export default function ServerAddModalForm(props: { onClose: Function }) {
+export default function ChannelAddModalForm(props: { onClose: Function }) {
+  const params = useParams();
   const dispatch = useAppDispatch();
-  const serversState = useAppSelector((state: RootState) => state.servers);
 
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
   const [nameError, setNameError] = useState(false);
-  const [descriptionError, setDescriptionError] = useState(false);
   const [newRequest, setNewRequest] = useState(false);
+  const state = useAppSelector((state: RootState) => state.singleServer);
 
   const handleNameChange = (event: React.ChangeEvent<FormElement>) => {
     setName(event.target.value);
@@ -33,31 +32,21 @@ export default function ServerAddModalForm(props: { onClose: Function }) {
     }
   };
 
-  const handleDescriptionChange = (event: React.ChangeEvent<FormElement>) => {
-    setDescription(event.target.value);
-
-    if (event.target.value.length < 1 || event.target.value.length > 300) {
-      setDescriptionError(true);
-    } else {
-      setDescriptionError(false);
-    }
-  };
-
   useEffect(() => {
-    if (serversState.addStatus === "succeeded" && newRequest) {
+    if (state.addChannelState === "succeeded" && newRequest) {
       props.onClose();
     }
-  }, [serversState.addStatus, newRequest]);
+  }, [state.addChannelState, newRequest]);
 
   return (
     <>
       <Modal.Header>
         <Text id="modal-title" b size={18}>
-          Add New Server
+          Add New Channel
         </Text>
       </Modal.Header>
       <Modal.Body>
-        {serversState.addStatus === "failed" && newRequest && (
+        {state.addChannelState === "failed" && newRequest && (
           <Alert status="error">
             <AlertIcon />
             <AlertDescription>
@@ -76,36 +65,23 @@ export default function ServerAddModalForm(props: { onClose: Function }) {
             Title must be between 5-80 characters in length
           </Text>
         )}
-        <Textarea
-          placeholder="Describe your server (1-300 characters long)"
-          rows={4}
-          aria-label={"description"}
-          onChange={handleDescriptionChange}
-        />
-        {descriptionError && (
-          <Text size={"12px"} color={"red"}>
-            Description must be between 1-300 characters in length
-          </Text>
-        )}
       </Modal.Body>
       <Modal.Footer css={{ pb: "25px" }}>
-        {serversState.addStatus === "pending" ? (
+        {state.addChannelState === "pending" ? (
           <Progress indeterminated value={50} color="gradient" />
         ) : (
           <Button
             css={{ w: "100%" }}
             auto
             ghost
-            disabled={
-              nameError ||
-              descriptionError ||
-              name.length === 0 ||
-              description.length === 0
-            }
             color="gradient"
+            disabled={nameError || name.length === 0}
             onClick={() => {
               dispatch(
-                addServerAction({ name: name, description: description })
+                addChannelAction({
+                  name: name,
+                  serverId: params.serverId as string,
+                })
               );
               setNewRequest(true);
             }}

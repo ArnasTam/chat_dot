@@ -63,7 +63,7 @@ export default class ServerController {
     const admin = await userRepository.findOne({ id: token.userId });
 
     if (token.role != Role.SuperAdmin && token.role != Role.ServerAdmin) {
-      ctx.status = 401;
+      ctx.status = 403;
       ctx.body = 'No permission to perform this action';
       return;
     }
@@ -112,7 +112,7 @@ export default class ServerController {
     }
 
     if (!ServerController.hasServerPermission(token, oldServer)) {
-      ctx.status = 401;
+      ctx.status = 403;
       ctx.body = 'No permission to perform this action';
       return;
     }
@@ -159,7 +159,7 @@ export default class ServerController {
     const serverToRemove: Server | undefined = await serverRepository.findOne(ctx.params.id);
 
     if (serverToRemove && !ServerController.hasServerPermission(token, serverToRemove)) {
-      ctx.status = 401;
+      ctx.status = 403;
       ctx.body = 'No permission to perform this action';
       return;
     }

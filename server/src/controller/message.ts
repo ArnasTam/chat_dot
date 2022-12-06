@@ -281,7 +281,7 @@ export default class MessageController {
       oldMessage &&
       !MessageController.hasServerPermission(token, server, oldMessage)
     ) {
-      ctx.status = 401;
+      ctx.status = 403;
       ctx.body = 'No permission to perform this action';
       return;
     }
@@ -356,7 +356,7 @@ export default class MessageController {
       messageToRemove &&
       !MessageController.hasServerPermission(token, server, messageToRemove)
     ) {
-      ctx.status = 401;
+      ctx.status = 403;
       ctx.body = 'No permission to perform this action';
       return;
     }

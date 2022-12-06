@@ -24,7 +24,7 @@ export class Channel {
 
   @ManyToOne(() => Server, (server) => server.channels, {
     eager: true,
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
   })
   server: Server;
 
